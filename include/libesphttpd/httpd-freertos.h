@@ -3,11 +3,11 @@
 #include "httpd.h"
 
 #ifdef FREERTOS
-#ifdef ESP32
 #include "lwip/sockets.h"
-#else
-#include "lwip/lwip/sockets.h"
-#endif
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
 #endif // #ifdef FREERTOS
 
 #ifdef CONFIG_ESPHTTPD_SSL_SUPPORT

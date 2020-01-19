@@ -4,25 +4,14 @@
 #ifdef FREERTOS
 #include <libesphttpd/esp.h>
 
-#ifdef ESP32
 #include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
-#else
-#include "FreeRTOS.h"
-#include "timers.h"
-#endif
 
 //#include "esp_timer.h"
 typedef struct RtosConnType RtosConnType;
 typedef RtosConnType* ConnTypePtr;
 
-#ifdef ESP32
-// freertos v8 api
 typedef TimerHandle_t HttpdPlatTimerHandle;
-#else
-// freertos v7 api
-typedef xTimerHandle HttpdPlatTimerHandle;
-#endif
 
 #ifdef ESP32
 #define ICACHE_FLASH_ATTR

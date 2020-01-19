@@ -9,7 +9,6 @@ ESP32 Cgi/template routines for the /wifi url.
 #include <libesphttpd/esp.h>
 #include <libesphttpd/cgiwifi.h>
 
-#if defined(ESP32)
 #include <stdatomic.h>
 #include <errno.h>
 
@@ -272,7 +271,8 @@ static void wifi_scan_done(system_event_t *event)
     \* really messed up.                                          */
     configASSERT(event->event_id == SYSTEM_EVENT_SCAN_DONE);
 
-    if(atomic_load(&scan_in_progress) == false){
+    if(atomic_load(&scan_in_progress) == false)
+    {
         /* Either scan was cancelled due to timeout or somebody else *\
         \* is triggering scans.                                      */
         ESP_LOGE(TAG, "[%s] Received unsolicited scan done event.",
@@ -373,7 +373,7 @@ static esp_err_t wifi_start_scan(void)
 {
     wifi_scan_config_t scan_cfg;
     wifi_mode_t mode;
-    esp_err_t result;
+    esp_err_t result = ESP_FAIL;
 
     /* Make sure we do not try to start a scan while the WiFi config is *\
     \* is in a transitional state.                                      */
@@ -1488,4 +1488,3 @@ CgiStatus tplWlan(HttpdConnData *connData, char *token, void **arg)
     return HTTPD_CGI_DONE;
 }
 
-#endif // ESP32

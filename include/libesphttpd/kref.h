@@ -25,7 +25,7 @@ static inline void kref_init(struct kref *kref)
 
 static inline void kref_get(struct kref *kref)
 {
-    int old;
+    int old = 0;
 
     old = atomic_fetch_add(&(kref->count), 1);
     configASSERT(old >= 1);
@@ -34,7 +34,7 @@ static inline void kref_get(struct kref *kref)
 static inline int kref_put(struct kref *kref, void (*release)(struct kref *kref))
 {
     int result;
-    int old;
+    int old = 1;
 
     configASSERT(release != NULL);
 

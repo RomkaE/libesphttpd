@@ -12,7 +12,6 @@ Some flash handling cgi routines. Used for updating the ESPFS/OTA image.
 #include "cJSON.h"
 
 #include "httpd-platform.h"
-#ifdef ESP32
 #include "esp32_flash.h"
 #include "esp_ota_ops.h"
 #include "esp_log.h"
@@ -20,7 +19,6 @@ Some flash handling cgi routines. Used for updating the ESPFS/OTA image.
 #include "esp_image_format.h"
 
 static const char *TAG = "ota";
-#endif
 
 #ifndef UPGRADE_FLAG_FINISH
 #define UPGRADE_FLAG_FINISH     0x02
@@ -64,7 +62,8 @@ CgiStatus ICACHE_FLASH_ATTR cgiGetFirmwareNext(HttpdConnData *connData) {
 	//Doesn't matter, we have a MMU to remap memory, so we only have one firmware image.
 	uint8_t id = 0;
 #else
-	uint8_t id = system_upgrade_userbin_check();
+	// uint8_t id = system_upgrade_userbin_check();
+	uint8_t id = 0;
 #endif
 	httpdStartResponse(connData, 200);
 	httpdHeader(connData, "Content-Type", "text/plain");
@@ -346,6 +345,8 @@ CgiStatus ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 #else
 
 CgiStatus ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
+  return HTTPD_CGI_NOTFOUND;
+  /*
 	CgiUploadFlashDef *def=(CgiUploadFlashDef*)connData->cgiArg;
 	UploadState *state=(UploadState *)connData->cgiData;
 	int len;
@@ -371,8 +372,8 @@ CgiStatus ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 		state->err="Premature end";
 	}
 
-	char *data=connData->post->buff;
-	int dataLen=connData->post->buffLen;
+	char *data=connData->post.buff;
+	int dataLen=connData->post.buffLen;
 
 	while (dataLen!=0) {
 		if (state->state==FLST_START) {
@@ -393,7 +394,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 						state->state=FLST_ERROR;
 					}
 				}
-				if (state->state!=FLST_ERROR && connData->post->len > def->fwSize*2+sizeof(OtaHeader)) {
+				if (state->state!=FLST_ERROR && connData->post.len > def->fwSize*2+sizeof(OtaHeader)) {
 					state->err="Firmware image too large";
 					state->state=FLST_ERROR;
 				}
@@ -510,18 +511,21 @@ CgiStatus ICACHE_FLASH_ATTR cgiUploadFirmware(HttpdConnData *connData) {
 	}
 
 	return HTTPD_CGI_MORE;
+	*/
 }
 #endif
 
 static HttpdPlatTimerHandle resetTimer;
 
 static void ICACHE_FLASH_ATTR resetTimerCb(void *arg) {
+  /*
 #ifndef ESP32
 	system_upgrade_flag_set(UPGRADE_FLAG_FINISH);
 	system_upgrade_reboot();
 #else
 	esp32flashRebootIntoOta();
 #endif
+*/
 }
 
 // Handle request to reboot into the new firmware
@@ -624,7 +628,8 @@ static int check_partition_valid_app(const esp_partition_t *partition)
     if (partition == NULL) {
         return 0;
     }
-
+    // TODO
+    /*
     esp_image_metadata_t data;
     const esp_partition_pos_t part_pos = {
         .offset = partition->address,
@@ -632,7 +637,7 @@ static int check_partition_valid_app(const esp_partition_t *partition)
     };
 	if (esp_image_verify(ESP_IMAGE_VERIFY_SILENT, &part_pos, &data) != ESP_OK) {
         return 0;  // partition does not hold a valid app
-    }
+    }*/
     return 1; // App in partition is valid
 }
 
@@ -695,6 +700,7 @@ CgiStatus ICACHE_FLASH_ATTR cgiGetFlashInfo(HttpdConnData *connData) {
             const esp_partition_t *it_partition = esp_partition_get(it);
     		if (it_partition != NULL)
     		{
+    		  ESP_LOGI(TAG, "Get partition. Name: %s, size: %d", it_partition->label, it_partition->size);
     			cJSON *partj = NULL;
     			partj = cJSON_CreateObject();
     			cJSON_AddStringToObject(partj, "name", it_partition->label);

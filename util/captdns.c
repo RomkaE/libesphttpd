@@ -16,19 +16,10 @@ the internal webserver.
 static const char* TAG = "captdns";
 
 #ifdef FREERTOS
-
-#ifdef ESP32
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "tcpip_adapter.h"
-#else
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#endif
-
-
 #include "lwip/sockets.h"
 #include "lwip/err.h"
 static int sockFd;
@@ -233,13 +224,9 @@ static void ICACHE_FLASH_ATTR captdnsRecv(struct sockaddr_in *premote_addr, char
 			setn32(&rf->ttl, 0);
 			setn16(&rf->rdlength, 4); //IPv4 addr is 4 bytes;
 			//Grab the current IP of the softap interface
-#ifdef ESP32
-            tcpip_adapter_ip_info_t info;
-            tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &info);
-#else
-			struct ip_info info;
-			wifi_get_ip_info(SOFTAP_IF, &info);
-#endif
+			tcpip_adapter_ip_info_t info;
+			tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &info);
+
 			*rend++=ip4_addr1(&info.ip);
 			*rend++=ip4_addr2(&info.ip);
 			*rend++=ip4_addr3(&info.ip);
@@ -301,12 +288,7 @@ static void captdnsTask(void *pvParameters) {
 	int32 ret;
 	struct sockaddr_in from;
 	socklen_t fromlen;
-#ifdef ESP32
     tcpip_adapter_ip_info_t ipconfig;
-#else
-	struct ip_info ipconfig;
-#endif
-
 	memset(&ipconfig, 0, sizeof(ipconfig));
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -343,11 +325,7 @@ static void captdnsTask(void *pvParameters) {
 }
 
 void captdnsInit(void) {
-#ifdef ESP32
 	xTaskCreate(captdnsTask, (const char *)"captdns_task", 3000, NULL, 3, NULL);
-#else
-	xTaskCreate(captdnsTask, (const signed char *)"captdns_task", 1200, NULL, 3, NULL);
-#endif
 }
 
 #else

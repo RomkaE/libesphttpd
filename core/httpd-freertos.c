@@ -32,13 +32,6 @@ Thanks to my collague at Espressif for writing the foundations of this code.
 
 #include "esp_log.h"
 
-#ifdef FREERTOS
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include "freertos/semphr.h"
-#endif
-
 #define fr_of_instance(instance) esp_container_of(instance, HttpdFreertosInstance, httpdInstance)
 #define frconn_of_conn(conn) esp_container_of(conn, RtosConnType, connData)
 
@@ -654,11 +647,7 @@ void httpdPlatTimerDelete(HttpdPlatTimerHandle handle)
 HttpdPlatTimerHandle httpdPlatTimerCreate(const char *name, int periodMs, int autoreload, void (*callback)(void *arg), void *ctx)
 {
     HttpdPlatTimerHandle ret;
-#ifdef ESP32
     ret=xTimerCreate(name, pdMS_TO_TICKS(periodMs), autoreload?pdTRUE:pdFALSE, ctx, callback);
-#else
-    ret=xTimerCreate((const signed char * const)name, (periodMs / portTICK_PERIOD_MS), autoreload?pdTRUE:pdFALSE, ctx, callback);
-#endif
     return ret;
 }
 
@@ -831,7 +820,7 @@ HttpdStartStatus ICACHE_FLASH_ATTR httpdFreertosStart(HttpdFreertosInstance *pIn
 #endif
     xTaskCreatePinnedToCore(platHttpServerTask, (const char *)"esphttpd", HTTPD_STACKSIZE, pInstance, CONFIG_ESPHTTPD_PROC_PRI, NULL, CONFIG_ESPHTTPD_PROC_CORE);
 #else
-    xTaskCreate(platHttpServerTask, (const signed char *)"esphttpd", HTTPD_STACKSIZE, pInstance, 4, NULL);
+    xTaskCreate(platHttpServerTask, (const char *)"esphttpd", HTTPD_STACKSIZE, pInstance, 4, NULL);
 #endif
 #endif
 

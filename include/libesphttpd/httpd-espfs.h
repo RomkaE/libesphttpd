@@ -5,6 +5,7 @@
 #include <libesphttpd/linux.h>
 #else
 #include <libesphttpd/esp.h>  // for sdkconfig.h
+#include "espfs.h"
 #endif
 
 #ifdef __cplusplus
@@ -28,6 +29,8 @@ CgiStatus ICACHE_FLASH_ATTR cgiEspFsTemplate(HttpdConnData *connData);
  * @return 1 upon success, 0 upon failure
  */
 int tplSend(HttpdConnData *conn, const char *str, int len);
+
+void httpdRegisterEspfs(EspFs *p_fs);
 
 #endif // CONFIG_ESPHTTPD_USE_ESPFS
 
