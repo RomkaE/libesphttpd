@@ -271,8 +271,9 @@ static void wifi_scan_done(system_event_t *event)
     \* really messed up.                                          */
     configASSERT(event->event_id == SYSTEM_EVENT_SCAN_DONE);
 
-    if(atomic_load(&scan_in_progress) == false)
-    {
+    // TODO
+    //if(atomic_load(&scan_in_progress) == false){
+    if(false){
         /* Either scan was cancelled due to timeout or somebody else *\
         \* is triggering scans.                                      */
         ESP_LOGE(TAG, "[%s] Received unsolicited scan done event.",
@@ -350,7 +351,8 @@ static void wifi_scan_done(system_event_t *event)
     }
 
     /* Clear scan flag so a new scan can be triggered. */
-    atomic_store(&scan_in_progress, false);
+    // TODO
+    //atomic_store(&scan_in_progress, false);
     if(scan_timer != NULL){
         xTimerStop(scan_timer, 0);
     }
@@ -361,7 +363,9 @@ static void handle_scan_timer(TimerHandle_t timer)
 {
     atomic_bool tmp = ATOMIC_VAR_INIT(true);
 
-    if(atomic_compare_exchange_strong(&scan_in_progress, &tmp, true) == true){
+    // TODO
+    //if(atomic_compare_exchange_strong(&scan_in_progress, &tmp, true) == true){
+    if (false){
         ESP_LOGI(TAG, "[%s] Timeout, stopping scan.", __FUNCTION__);
         (void) esp_wifi_scan_stop();
         atomic_store(&scan_in_progress, false);
@@ -402,7 +406,10 @@ static esp_err_t wifi_start_scan(void)
     }
 
     /* Finally, start a scan. Unless there is one running already. */
-    if(atomic_exchange(&scan_in_progress, true) == false){
+    // TODO
+    //if(atomic_exchange(&scan_in_progress, true) == false){
+    if (false)
+    {
         ESP_LOGI(TAG, "[%s] Starting scan.", __FUNCTION__);
 
         memset(&scan_cfg, 0x0, sizeof(scan_cfg));
