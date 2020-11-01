@@ -33,6 +33,9 @@ const static char* TAG = "httpd";
 #define HFL_NOCONNECTIONSTR (1<<4)
 
 
+const char *httpdCgiEx = "HttpdCgiExArg";
+
+
 //Struct to keep extension->mime data in
 typedef struct {
     const char *ext;
@@ -593,6 +596,7 @@ static void ICACHE_FLASH_ATTR httpdProcessRequest(HttpdInstance *pInstance, Http
 
             if (match) {
                 ESP_LOGD(TAG, "Is url index %d", i);
+                conn->route=route;
                 conn->cgiData=NULL;
                 conn->cgi=pUrl->cgiCb;
                 conn->cgiArg=pUrl->cgiArg;
@@ -811,6 +815,8 @@ CallbackStatus ICACHE_FLASH_ATTR httpdRecvCb(HttpdInstance *pInstance, HttpdConn
                 } else
                 {
                     ESP_LOGE(TAG, "adding newline request too long");
+                    status = CallbackErrorMemory;
+                    break;
                 }
             }
 
@@ -821,6 +827,8 @@ CallbackStatus ICACHE_FLASH_ATTR httpdRecvCb(HttpdInstance *pInstance, HttpdConn
             } else
             {
                 ESP_LOGE(TAG, "request too long!");
+                status = CallbackErrorMemory;
+                break;
             }
 
             // always null terminate
